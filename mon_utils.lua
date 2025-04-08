@@ -1,9 +1,14 @@
 BUTTONS = {}
 
-function UpdateMonitor(mon, reactor)
-    mon.setCursorPos(1, 1)
+function ResetMonitor(mon)
     mon.clear()
-    mon.write("Reactor Status")
+    mon.setCursorPos(1, 1)
+    mon.setTextColor(colors.white)
+end
+
+function UpdateMonitor(mon, reactor)
+    ResetMonitor(mon)
+    mon.write(reactor.Name)
 
     -- * State
     mon.setCursorPos(1, 2)
@@ -64,8 +69,13 @@ function UpdateMonitor(mon, reactor)
     else
         mon.setTextColor(colors.red)
     end
+
     mon.write(string.format("%.1f%%", rodLevel))
     mon.setTextColor(colors.white)
+
+    -- * Temperature and Energy Output
+    mon.setCursorPos(1, 7)
+    mon.write(string.format("Temp: %.1fC | Output: %d FE/t", reactor.getCasingTemperature(), reactor.getEnergyProducedLastTick()))
 
     DrawButtons(mon)
 end
@@ -95,12 +105,10 @@ local function BreakProg()
 end
 
 local function ToggleReactorState()
-    print("Toggling reactor state")
     reactor.setActive(not reactor.getActive())
 end
 
 local function IncreaseRodLevel()
-    print("Increasing rod level")
     local newLevel = math.min(reactor.getControlRodLevel(1) + 10, 100)
     for i = 1, reactor.getNumberOfControlRods() do
         reactor.setControlRodLevel(i, newLevel)
@@ -108,7 +116,6 @@ local function IncreaseRodLevel()
 end
 
 local function DecreaseRodLevel()
-    print("Decreasing rod level")
     local newLevel = math.max(reactor.getControlRodLevel(1) - 10, 0)
     for i = 1, reactor.getNumberOfControlRods() do
         reactor.setControlRodLevel(i, newLevel)
@@ -116,7 +123,6 @@ local function DecreaseRodLevel()
 end
 
 local function ToggleOverride()
-    print("Toggling override")
     if reactor.STATE == REAC_OVERRIDE then
         reactor.LeaveOverride()
     else
@@ -125,11 +131,11 @@ local function ToggleOverride()
 end
 
 function DrawButtons(mon)
-    local b1 = CreateButton(mon, 2, 8, 12, 1, "Toggle State", ToggleReactorState)
-    local b2 = CreateButton(mon, 2, 10, 12, 1, "Rod +10%", IncreaseRodLevel)
-    local b3 = CreateButton(mon, 2, 12, 12, 1, "Rod -10%", DecreaseRodLevel)
-    local b4 = CreateButton(mon, 2, 14, 12, 1, "Override", ToggleOverride)
-    local b5 = CreateButton(mon, 1, 50, 1, 1, "X", BreakProg)
+    local b4 = CreateButton(mon, 28, 8, 12, 1, "OVERRIDE", ToggleOverride)
+    local b1 = CreateButton(mon, 28, 10, 12, 1, "Toggle State", ToggleReactorState)
+    local b2 = CreateButton(mon, 28, 12, 12, 1, "Rod +10%", IncreaseRodLevel)
+    local b3 = CreateButton(mon, 28, 14, 12, 1, "Rod -10%", DecreaseRodLevel)
+    local b5 = CreateButton(mon, 37, 1, 3, 1, "X", BreakProg)
 
-    BUTTONS = {b1, b2, b3, b4}
+    BUTTONS = {b1, b2, b3, b4, b5}
 end

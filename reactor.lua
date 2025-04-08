@@ -1,8 +1,11 @@
 require("mon_utils")
 require("reac_enums")
+require("config_read")
 
-local rID = "BigReactors-Reactor_0"
-local monID = "right"
+local rID, monID, rName = ConfigRead()
+
+-- local rID = "BigReactors-Reactor_0"
+-- local monID = "right"
 
 ReactorState = REAC_STOPPED
 BREAK_CONDITION = false
@@ -20,6 +23,9 @@ if not mon then
     print("Couldn't find monitor")
     return
 end
+
+r.STATE = REAC_STOPPED
+r.Name = rName
 
 
 function SetAllRods(val)
@@ -109,6 +115,7 @@ end
 function r.LeaveOverride()
     ReactorState = REAC_STOPPED
     LoadState(r)
+    PollStateChange(r)
 end
 
 
@@ -120,6 +127,9 @@ function MainLoop(r, mon)
             UpdateMonitor(mon, r)
             os.sleep(0.2)
         end
+        ResetMonitor(mon)
+        print("Exited.")
+        console.clear()
     end
 
     -- Function to handle button clicks
